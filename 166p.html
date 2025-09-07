@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>16 Queens Puzzle</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; }
+    #board {
+      display: grid;
+      grid-template-columns: repeat(16, 30px);
+      grid-template-rows: repeat(16, 30px);
+      gap: 1px;
+      margin: 20px auto;
+      width: fit-content;
+    }
+    .cell {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #eee;
+      cursor: pointer;
+      font-size: 20px;
+    }
+    /* Alternate cell background */
+    .cell:nth-child(even) { background: #ccc; }
+    .queen { background: #90ee90 !important; }
+    .conflict { background: #f08080 !important; }
+  </style>
+</head>
+<body>
+  <h1>16×16 Queens Puzzle</h1>
+  <p>Click a cell to place/remove a queen (♛). Goal: 16 queens with no conflicts.</p>
+  <div id="board"></div>
+  <button onclick="checkBoard()">Check Safety</button>
+  <p id="status"></p>
+
+  <script>
+    const N = 16;
+    const board = document.getElementById('board');
+    const status = document.getElementById('status');
+    const cells = [];
+
+    // Build grid
+    for (let r = 0; r < N; r++) {
+      for (let c = 0; c < N; c++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.r = r;
+        cell.dataset.c = c;
+        cell.onclick = () => toggleQueen(r, c);
+        board.appendChild(cell);
+        cells.push(cell);
+      }
+    }
+
+    function idx(r, c) { return r * N + c; }
+
+    function toggleQueen(r, c) {
+      const cell = cells[idx(r, c)];
+      if (cell.textContent === '♛') {
+        cell.textContent = '';
+        cell.classList.remove('queen', 'conflict');
+      } else {
+        cell.textContent = '♛';
+        cell.classList.add('queen');
+      }
+    }
+
+    function checkBoard() {
+      // Reset conflicts
+      cells.forEach(c => c.classList.remove('conflict'));
+      const queens = [];
+      for (let r = 0; r < N; r++) {
+        for (let c = 0; c < N; c++) {
+          if (cells[idx(r, c)].textContent === '♛') queens.push([r, c]);
+        }
+      }
+
+      let conflicts = 0;
+      for (let i = 0; i < queens.length; i++) {
+        for (let j = i + 1; j < queens.length; j++) {
+          const [r1, c1] = queens[i];
+          const [r2, c2] = queens[j];
+          if (r1 === r2 || c1 === c2 || (r1 - c1 === r2 - c2) || (r1 + c1 === r2 + c2)) {
+            cells[idx(r1, c1)].classList.add('conflict');
+            cells[idx(r2, c2)].classList.add('conflict');
+            conflicts++;
+          }
+        }
+      }
+
+      if (queens.length === 16 && conflicts === 0) {
+        status.textContent = "✅ You solved it! 16 queens safely placed.";
+      } else {
+        status.textContent = `Queens: ${queens.length}/16, Conflicts: ${conflicts}`;
+      }
+    }
+  </script>
+</body>
+</html>
